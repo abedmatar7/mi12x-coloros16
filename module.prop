@@ -1,0 +1,6 @@
+id=coloros16_psyche_fod_aod_fix
+name=Xiaomi 12X (psyche) ColorOS 16 FOD & AOD HAL Bridge
+version=v1.0.0-rs
+versionCode=100
+author=Abed El-Reda Matar (via hoshikv Rust HALs)
+description=Fixes FOD (no-dim HBM, screen-off FOD, QuickLaunch) & Full AOD on Xiaomi 12X (psyche / SM8250) ColorOS 16 ports using MiOplusFingerprint-rs, mfp-daemon-rs, oplus_vibrator-aidl, vendor_oplus-charger-rs, and kave-thermalized.

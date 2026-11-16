@@ -1,0 +1,19 @@
+# Xiaomi 12X (psyche) FOD Hardware & Coordinate Geometry (1080x2400 AMOLED)
+ro.hardware.fp.fod=true
+persist.vendor.sys.fp.fod.location.X_Y=441,1808
+persist.vendor.sys.fp.fod.size.width_height=198,198
+persist.vendor.sys.fp.fod.large_field=0
+
+# ColorOS 16 / Oplus FOD & DisplayPanelFeature No-Dim HBM Configuration
+ro.oplus.display.fod.support=1
+persist.sys.oplus.fod.dimlayer.disable=1
+persist.vendor.oplus.fod.no_dim_brightness=1
+persist.vendor.oplus.fod.quicklaunch=1
+persist.vendor.oplus.fod.screen_off_unlock=1
+
+# ColorOS 16 Full AOD & Doze Brightness Support on Xiaomi SM8250
+ro.oplus.display.aod.support=1
+persist.vendor.oplus.aod.enable=1
+persist.sys.oplus.aod.full_aod=1
+ro.surface_flinger.has_HDR_display=true
+ro.surface_flinger.use_color_management=true

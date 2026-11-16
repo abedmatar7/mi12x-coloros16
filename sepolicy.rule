@@ -1,0 +1,20 @@
+# Allow fingerprint and display HALs to access Xiaomi DRM / mi_disp and Goodix nodes
+allow hal_fingerprint_default sysfs_drm dir { search read open }
+allow hal_fingerprint_default sysfs_drm file { read write open getattr }
+allow hal_fingerprint_default sysfs file { read write open getattr }
+allow hal_fingerprint_default device chr_file { read write open ioctl getattr }
+allow hal_fingerprint_default uhid_device chr_file { read write open ioctl getattr }
+allow hal_fingerprint_default input_device dir { search read open }
+allow hal_fingerprint_default input_device chr_file { read write open ioctl getattr }
+
+# Allow registering and finding Oplus Biometrics & DisplayPanelFeature AIDL services
+allow hal_fingerprint_default default_android_vndservice service_manager { add find }
+allow hal_fingerprint_default default_android_service service_manager { add find }
+allow system_server default_android_service service_manager { find }
+allow platform_app default_android_service service_manager { find }
+
+# Vibrator & Charger AIDL permissions
+allow hal_vibrator_default sysfs_leds dir { search read open }
+allow hal_vibrator_default sysfs_leds file { read write open getattr }
+allow hal_health_default sysfs_batteryinfo dir { search read open }
+allow hal_health_default sysfs_batteryinfo file { read write open getattr }

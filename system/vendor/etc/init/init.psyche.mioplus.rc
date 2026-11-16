@@ -1,0 +1,34 @@
+on boot
+    chown system system /dev/goodix_fp
+    chmod 0666 /dev/goodix_fp
+    chown system system /dev/mi_display/disp_feature
+    chmod 0666 /dev/mi_display/disp_feature
+    chown system system /sys/class/drm/card0-DSI-1/disp_param
+    chmod 0666 /sys/class/drm/card0-DSI-1/disp_param
+    chown system system /sys/class/drm/card0-DSI-1/doze_brightness
+    chmod 0666 /sys/class/drm/card0-DSI-1/doze_brightness
+    chown system system /sys/class/drm/card0-DSI-1/fod_ui
+    chmod 0664 /sys/class/drm/card0-DSI-1/fod_ui
+
+service vendor.mfp-daemon /vendor/bin/hw/mfp-daemon
+    class late_start
+    user system
+    group system input uhid
+
+service vendor.mioplus-fingerprint /vendor/bin/hw/mioplus-fingerprint-service
+    class late_start
+    user system
+    group system input uhid
+    interface aidl android.hardware.biometrics.fingerprint.IFingerprint/default
+    interface aidl vendor.oplus.hardware.biometrics.fingerprint.IFingerprint/default
+    interface aidl vendor.oplus.hardware.displaypanelfeature.IDisplayPanelFeature/default
+
+service vendor.oplus.vibrator /vendor/bin/hw/vendor.oplus.hardware.vibrator-service
+    class hal
+    user system
+    group system input
+
+service vendor.oplus.charger /vendor/bin/hw/vendor.oplus.hardware.charger-service
+    class hal
+    user system
+    group system

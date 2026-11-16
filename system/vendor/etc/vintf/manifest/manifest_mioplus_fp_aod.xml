@@ -1,0 +1,27 @@
+<manifest version="1.0" type="device">
+    <hal format="aidl">
+        <name>android.hardware.biometrics.fingerprint</name>
+        <version>4</version>
+        <fqname>IFingerprint/default</fqname>
+    </hal>
+    <hal format="aidl">
+        <name>vendor.oplus.hardware.biometrics.fingerprint</name>
+        <version>1</version>
+        <fqname>IFingerprint/default</fqname>
+    </hal>
+    <hal format="aidl">
+        <name>vendor.oplus.hardware.displaypanelfeature</name>
+        <version>1</version>
+        <fqname>IDisplayPanelFeature/default</fqname>
+    </hal>
+    <hal format="aidl">
+        <name>vendor.oplus.hardware.vibrator</name>
+        <version>1</version>
+        <fqname>IVibrator/default</fqname>
+    </hal>
+    <hal format="aidl">
+        <name>vendor.oplus.hardware.charger</name>
+        <version>1</version>
+        <fqname>ICharger/default</fqname>
+    </hal>
+</manifest>
