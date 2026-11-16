@@ -1,0 +1,103 @@
+name: Build Xiaomi 12X (psyche) ColorOS 16 FOD & AOD Magisk Module
+
+on:
+  workflow_dispatch:
+    inputs:
+      include_thermal:
+        description: 'Include kave-thermalized binary in Magisk module'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build-magisk-module:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout Magisk Module Skeleton
+        uses: actions/checkout@v4
+
+      - name: Install Rust Toolchain & Android NDK Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential clang llvm lld git zip curl pkg-config libclang-dev protobuf-compiler
+          rustup default stable
+          rustup target add aarch64-linux-android
+          cargo install cargo-ndk
+
+      - name: Clone hoshikv Repositories
+        run: |
+          mkdir -p build_src
+          git clone https://github.com/hoshikv/mfp-daemon-rs.git build_src/mfp-daemon-rs
+          git clone https://github.com/hoshikv/MiOplusFingerprint-rs.git build_src/MiOplusFingerprint-rs
+          git clone https://github.com/hoshikv/oplus_vibrator-aidl.git build_src/oplus_vibrator-aidl
+          git clone https://github.com/hoshikv/vendor_oplus-charger-rs.git build_src/vendor_oplus-charger-rs
+          if [ "${{ inputs.include_thermal }}" != "false" ]; then
+            git clone https://github.com/hoshikv/kave-thermalized.git build_src/kave-thermalized
+          fi
+
+      - name: Verify MiOplusFingerprint-rs Commit b2954ad4 (No-Dim FOD & Full AOD)
+        run: |
+          cd build_src/MiOplusFingerprint-rs
+          git log -n 5 --oneline
+          # Ensure commit b2954ad49e56eb76537891face554aa1fd2da0b6 or newer HEAD is checked out
+          git cat-file -e b2954ad49e56eb76537891face554aa1fd2da0b6^{commit} && echo "Verified commit b2954ad4 is in tree!"
+
+      - name: Cross-Compile Rust HAL Binaries for aarch64-linux-android (API 34)
+        env:
+          ANDROID_NDK_HOME: ${{ env.ANDROID_NDK_LATEST_HOME }}
+        run: |
+          mkdir -p system/vendor/bin/hw
+
+          echo "=== Building mfp-daemon-rs ==="
+          if [ -f build_src/mfp-daemon-rs/Cargo.toml ]; then
+            (cd build_src/mfp-daemon-rs && cargo ndk -t arm64-v8a -p 34 build --release)
+            find build_src/mfp-daemon-rs/target/aarch64-linux-android/release -maxdepth 1 -type f -executable -exec cp {} system/vendor/bin/hw/mfp-daemon \;
+          fi
+
+          echo "=== Building MiOplusFingerprint-rs ==="
+          if [ -f build_src/MiOplusFingerprint-rs/Cargo.toml ]; then
+            (cd build_src/MiOplusFingerprint-rs && cargo ndk -t arm64-v8a -p 34 build --release)
+            find build_src/MiOplusFingerprint-rs/target/aarch64-linux-android/release -maxdepth 1 -type f -executable -exec cp {} system/vendor/bin/hw/mioplus-fingerprint-service \;
+          fi
+
+          echo "=== Building oplus_vibrator-aidl ==="
+          if [ -f build_src/oplus_vibrator-aidl/Cargo.toml ]; then
+            (cd build_src/oplus_vibrator-aidl && cargo ndk -t arm64-v8a -p 34 build --release)
+            find build_src/oplus_vibrator-aidl/target/aarch64-linux-android/release -maxdepth 1 -type f -executable -exec cp {} system/vendor/bin/hw/vendor.oplus.hardware.vibrator-service \;
+          fi
+
+          echo "=== Building vendor_oplus-charger-rs ==="
+          if [ -f build_src/vendor_oplus-charger-rs/Cargo.toml ]; then
+            (cd build_src/vendor_oplus-charger-rs && cargo ndk -t arm64-v8a -p 34 build --release)
+            find build_src/vendor_oplus-charger-rs/target/aarch64-linux-android/release -maxdepth 1 -type f -executable -exec cp {} system/vendor/bin/hw/vendor.oplus.hardware.charger-service \;
+          fi
+
+          if [ "${{ inputs.include_thermal }}" != "false" ] && [ -f build_src/kave-thermalized/Cargo.toml ]; then
+            echo "=== Building kave-thermalized ==="
+            (cd build_src/kave-thermalized && cargo ndk -t arm64-v8a -p 34 build --release)
+            find build_src/kave-thermalized/target/aarch64-linux-android/release -maxdepth 1 -type f -executable -exec cp {} system/vendor/bin/kave-thermalized \;
+          fi
+
+      - name: Package Flashable Magisk Module ZIP
+        run: |
+          rm -rf build_src .git
+          zip -r9 ColorOS16-Psyche-FOD-AOD-Fix-Magisk-Signed.zip \
+            META-INF \
+            module.prop \
+            customize.sh \
+            post-fs-data.sh \
+            service.sh \
+            sepolicy.rule \
+            system.prop \
+            system
+
+      - name: Upload Flashable Magisk Module Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ColorOS16-Psyche-FOD-AOD-Fix-Magisk
+          path: ColorOS16-Psyche-FOD-AOD-Fix-Magisk-Signed.zip
